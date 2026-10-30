@@ -1,46 +1,74 @@
-public class ArrayQueue {
-    private int[] elements;
+public class ArrayQueue<T> implements QueueInterface<T> {
+    private Object[] elements;
     private int head;
-    private int tail;
     private int size;
+
     public ArrayQueue() {
-        this.elements = new int[4];
-        this.head = 0;
-        this.tail = -1;
-        this.size = 0;
+        elements = new Object[4];
     }
 
-    public boolean isEmpty() {
+    @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public boolean empty() {
         return size == 0;
     }
 
-    public boolean isFull() {
-        return size == elements.length;
-    }
-
-    public void enqueue(int value) {
-        if (isFull()) {
-            throw new IllegalStateException("Queue is full");
-        }
-        tail = (tail + 1) % elements.length;
-        elements[tail] = value;
+    @Override
+    public T add(T item) {
+        ensureCapacity();
+        elements[(head + size) % elements.length] = item;
         size++;
+        return item;
     }
 
-    public int dequeue() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Queue is empty");
+    @Override
+    public T peek() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty");
         }
-        int value = elements[head];
+        return elementAt(head);
+    }
+
+    @Override
+    public T remove() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty");
+        }
+    
+        T item = elementAt(head);
+        elements[head] = null;
         head = (head + 1) % elements.length;
         size--;
-        return value;
+        if (size == 0) {
+            head = 0;
+        }
+        return item;
     }
 
-    public int peek() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Queue is empty");
+    @Override
+    public void clear() {
+        elements = new Object[4];
+        head = 0;
+        size = 0;
+    }
+
+    private void ensureCapacity() {
+        if (size == elements.length) {
+            Object[] expanded = new Object[elements.length * 2];
+            for (int i = 0; i < size; i++) {
+                expanded[i] = elements[(head + i) % elements.length];
+            }
+            elements = expanded;
+            head = 0;
         }
-        return elements[head];
+    }
+
+    @SuppressWarnings("unchecked")
+    private T elementAt(int index) {
+        return (T) elements[index];
     }
 }
