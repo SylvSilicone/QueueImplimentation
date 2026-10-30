@@ -1,68 +1,67 @@
-
-public class LinkedQueue {
+public class LinkedQueue<T> implements QueueInterface<T> {
     private Node head;
     private Node tail;
     private int size;
 
     private class Node {
-        int data;
-        Node next;
+        private final T data;
+        private Node next;
 
-        public Node(int data) {
+        private Node(T data) {
             this.data = data;
-            this.next = null;
         }
     }
 
-    public LinkedQueue() {
-        head = null;
-        tail = null;
-        size = 0;
+    @Override
+    public int size() {
+        return size;
     }
 
-    public boolean isEmpty() {
+    @Override
+    public boolean empty() {
         return size == 0;
     }
 
-    public boolean isFull() {
-        return false;
-    }
-
-    public void enqueue(int value) {
-        Node newNode = new Node(value);
-
-        if (isEmpty()) {
-            head = newNode;
-            tail = newNode;
+    @Override
+    public T add(T item) {
+        Node node = new Node(item);
+        if (tail == null) {
+            head = node;
         } else {
-            tail.next = newNode;
-            tail = newNode;
+            tail.next = node;
         }
-
+        tail = node;
         size++;
+        return item;
     }
 
-    public int dequeue() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Queue is empty");
+    @Override
+    public T peek() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty");
+        }
+        return head.data;
+    }
+
+    @Override
+    public T remove() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty");
         }
 
-        int value = head.data;
+        T item = head.data;
         head = head.next;
         size--;
-
-        if (isEmpty()) {
+        if (head == null) {
             tail = null;
         }
-
-        return value;
+        return item;
     }
 
-    public int peek() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Queue is empty");
-        }
-
-        return head.data;
+    @Override
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
     }
 }
